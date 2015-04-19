@@ -9,7 +9,7 @@ require_once "KeyValues.php";
   Data: 18/04/2015
 */
 
-class CryptoControl extends KeyValues {
+class CryptoControl {
 
 	public $helper;
 	public $keyValues;
@@ -19,34 +19,34 @@ class CryptoControl extends KeyValues {
 		$this->keyValues = new KeyValues($primo1, $primo2, $message);
 	}
 
-	public function createPublicKey ($primo1, $primo2) {
-		//utilizando codigo duplicado
-		$num = $primo1 * $primo2;
-		$multprimos = $this->multiplica_primos($primo1, $primo2);
-		$totient = $this->totient($multprimos);
+	public function createPublicKey () {
+		$resultPrimes = $this->helper->multiplyPrimeNumbers($this->keyValues->getNumeroPrimo1(), $this->keyValues->getNumeroPrimo2());
+		$resultTotient = $this->helper->calculateTotient($resultPrimes);
 
-		for ($i = 2; $i < $totient; $i++) {
-			if ($this->isPrimeWithoutException($i)) {
-				if ($this->mdc($totient, $i) == 1) {
+		for ($i = 2; $i < $resultTotient; $i++) {
+			if ($this->helper->isPrimeWithoutException($i)) {
+				if ($this->helper->calculateGDC($resultTotient, $i) == 1) {
 					$e = $i;
+					//posso pegar qualquer um que seja co-primo de 697
 					break;
 				}
 			}
 		}
 
-		$publicKeyValues = array('n' => $multprimos,
+		$publicKeyValues = array('n' => $resultPrimes,
 									'e' => $e);
 		return $publicKeyValues;
 	}
 
-	public function cryptoWithPublicKey($texto, $p, $q) {
-		$myPublicKey = $this->createPublicKey($p , $q);
+	public function cryptoWithPublicKey() {
+		$myPublicKey = $this->createPublicKey();
+		$message = $this->keyValues->getMessage();
 		$cryptoText = null;
 
-		for ($i = 0; $i < strlen($texto); $i++) { 
+		for ($i = 0; $i < strlen($message); $i++) { 
 			$count = 1;
 
-			$eachWord = ord(substr($texto, $i, $count));
+			$eachWord = ord(substr($message, $i, $count));
 			$cryptoWord = pow($eachWord, $myPublicKey['e']) % $myPublicKey['n'];
 
 			$count++;
@@ -56,37 +56,36 @@ class CryptoControl extends KeyValues {
 		return substr($cryptoText, 1);
 	}
 
-	public function createPrivateKey($p, $q) {
-		$multPrimos = $this->multiplica_primos($p, $q);
-		$publicKey = $this->createPublicKey($p, $q);
+	#254 68 41 91 592 350
+	# T   U  R  I  N   G
+	public function createPrivateKey() {
+		$resultPrimes = $this->helper->multiplyPrimeNumbers($this->keyValues->getNumeroPrimo1(), $this->keyValues->getNumeroPrimo2());
+		$publicKey = $this->createPublicKey();
 
-		$num = $this->mdc($this->totient($multPrimos), $publicKey['e']);
+		$teste = $this->helper->calculateGDC($this->helper->calculateTotient($resultPrimes), $publicKey['e']);
 
 		echo $num;
 	}
 
 	//public function descryptoWithPrivateKey();
 
+
+
+
+
+
+
 	public function criptografa_descriptografa_simetrica() {
-
-		$message = $keyValues->getMessage();
-
-		//imprimo texto original
+		$message = $this->keyValues->getMessage();
 		echo "Texto original: " . $message . "\n";
-
-		//imprimo texto criptografado
 		echo "Chave criptografada: " . base64_encode($message) . "\n";
 
-		//texto criptografado
 		$message_criptografada = base64_encode($message);
-
-		//imprimo texto descriptografado
 		echo "Chave descriptografada: " . base64_decode($message_criptografada) . "\n";
 	}
 
 }
 
-$exec = new CryptoControl();
-//$exec->criptografa_descriptografa_simetrica("João convidou Maria para comer pão.");
-$resposta = $exec->criptografa_descriptografa_simetrica();
-echo $resposta;
+$exec = new CryptoControl(17, 41, "TURING");
+$resposta = $exec->cryptoWithPublicKey();
+print_r ($resposta);

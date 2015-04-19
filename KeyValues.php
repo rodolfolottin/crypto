@@ -8,7 +8,7 @@ class KeyValues {
 	public $numeroPrimo_2;
 	public $message;
 	
-	public function __construct($primo1, $primo2, $message) {
+	public function KeyValues($primo1, $primo2, $message) {
 		$this->numeroPrimo_1 = $primo1;
 		$this->numeroPrimo_2 = $primo2;
 		$this->message = $message;
