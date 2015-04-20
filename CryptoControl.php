@@ -20,7 +20,8 @@ class CryptoControl {
 	}
 
 	public function createPublicKey () {
-		$resultPrimes = $this->helper->multiplyPrimeNumbers($this->keyValues->getNumeroPrimo1(), $this->keyValues->getNumeroPrimo2());
+		$resultPrimes = $this->helper->multiplyPrimeNumbers($this->keyValues->getNumeroPrimo1(), 
+																$this->keyValues->getNumeroPrimo2());
 		$resultTotient = $this->helper->calculateTotient($resultPrimes);
 
 		for ($i = 2; $i < $resultTotient; $i++) {
@@ -37,7 +38,7 @@ class CryptoControl {
 		return $publicKeyValues;
 	}
 
-	public function cryptoWithPublicKey() {
+	public function cryptoWithPublicKey () {
 		$myPublicKey = $this->createPublicKey();
 		$message = $this->keyValues->getMessage();
 		$cryptoText = null;
@@ -55,9 +56,9 @@ class CryptoControl {
 		return substr($cryptoText, 1);
 	}
 
-	public function createPrivateKey() {
-		$resultPrimes = $this->helper->multiplyPrimeNumbers($this->keyValues->getNumeroPrimo1(), $this->keyValues->getNumeroPrimo2());
-		$resultTotient = $this->helper->calculateTotient($resultPrimes);
+	public function createPrivateKey () {
+		$resultTotient = $this->helper->calculateTotient($this->helper->multiplyPrimeNumbers(
+										$this->keyValues->getNumeroPrimo1(), $this->keyValues->getNumeroPrimo2()));
 		$publicKey = $this->createPublicKey();
 
 		$count = null;;
@@ -68,14 +69,17 @@ class CryptoControl {
 			$i = ($count * $publicKey['e']) % $resultTotient;
 		}
 
+		$p = $this->keyValues->getNumeroPrimo1();
+		$q = $this->keyValues->getNumeroPrimo2();
 		$d = $count;
 
-		$privateKeyValues = array('n' => $resultPrimes,
-									'd' => $d);
+		$privateKeyValues = array('p' => $p,
+									'q' => $q,
+										'd' => $d);
 		return $privateKeyValues;
 	}
 
-	public function descryptoWithPrivateKey() {
+	public function descryptoWithPrivateKey () {
 		$privateKey = $this->createPrivateKey();
 		$cryptoMessage = $this->cryptoWithPublicKey();
 		$descryptoText = null;
@@ -83,25 +87,44 @@ class CryptoControl {
 		$pieces = explode(" ", $cryptoMessage);
 
 		foreach ($pieces as $piece) {
-			$eachPieceValue = bcmod(bcpow($piece, $privateKey['d']),$privateKey['n']);
+			$eachPieceValue = bcmod(bcpow($piece, $privateKey['d']), $privateKey['p'] * $privateKey['q']);
 			$descryptoText .= chr($eachPieceValue);
 		}
 
 		return $descryptoText;
 	}
 
-	public function simetric_crypto() {
+	public function simmetryc_crypto () {
 		$message = $this->keyValues->getMessage();
 		echo "Texto original: " . $message . "\n";
-		echo "Chave criptografada: " . base64_encode($message) . "\n";
+		echo "Texto criptografado: " . base64_encode($message) . "\n";
 
 		$cryptoMessage = base64_encode($message);
-		echo "Chave descriptografada: " . base64_decode($cryptoMessage) . "\n";
+		echo "Texto descriptografado: " . base64_decode($cryptoMessage) . "\n";
+	}
+
+	public function asimmetryc_crypto () {
+		$message = $this->keyValues->getMessage();
+		$publicKey = $this->createPublicKey();
+		$cryptoText = $this->cryptoWithPublicKey();
+		$privateKey = $this->createPrivateKey();
+		$descryptoText = $this->descryptoWithPrivateKey();
+
+		echo "Texto original: " . $message . "\n";
+		echo "Chave pública: ";
+		  	print_r($publicKey) . "\n";
+		echo "Texto criptografado: " . $cryptoText . "\n";
+		echo "Chave privada: ";
+		  	print_r($privateKey) . "\n";
+		echo "Texto descriptografado: " . $descryptoText . "\n";
 	}
 
 }
 
-$exec = new CryptoControl(17, 23, "TURING");
+$exec = new CryptoControl(19, 23, "Desafio LabSEC");
 //$resposta = $exec->cryptoWithPublicKey();
-$resposta = $exec->descryptoWithPrivateKey() . "\n";
-print_r($resposta);
+echo "Simétrica" . "\n";
+$respostaSimmetryc = $exec->simmetryc_crypto();
+echo "\n";
+echo "Assimétrica" . "\n";
+$respostaAsimmetryc = $exec->asimmetryc_crypto();
