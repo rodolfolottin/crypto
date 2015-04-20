@@ -27,7 +27,6 @@ class CryptoControl {
 			if ($this->helper->isPrimeWithoutException($i)) {
 				if ($this->helper->calculateGDC($resultTotient, $i) == 1) {
 					$e = $i;
-					//posso pegar qualquer um que seja co-primo de 697
 					break;
 				}
 			}
@@ -56,36 +55,53 @@ class CryptoControl {
 		return substr($cryptoText, 1);
 	}
 
-	#254 68 41 91 592 350
-	# T   U  R  I  N   G
 	public function createPrivateKey() {
 		$resultPrimes = $this->helper->multiplyPrimeNumbers($this->keyValues->getNumeroPrimo1(), $this->keyValues->getNumeroPrimo2());
+		$resultTotient = $this->helper->calculateTotient($resultPrimes);
 		$publicKey = $this->createPublicKey();
 
-		$teste = $this->helper->calculateGDC($this->helper->calculateTotient($resultPrimes), $publicKey['e']);
+		$count = null;;
+		$i = null;
 
-		echo $num;
+		while ($i !== 1) {
+			$count++;
+			$i = ($count * $publicKey['e']) % $resultTotient;
+		}
+
+		$d = $count;
+
+		$privateKeyValues = array('n' => $resultPrimes,
+									'd' => $d);
+		return $privateKeyValues;
 	}
 
-	//public function descryptoWithPrivateKey();
+	public function descryptoWithPrivateKey() {
+		$privateKey = $this->createPrivateKey();
+		$cryptoMessage = $this->cryptoWithPublicKey();
+		$descryptoText = null;
 
+		$pieces = explode(" ", $cryptoMessage);
 
+		foreach ($pieces as $piece) {
+			$eachPieceValue = bcmod(bcpow($piece, $privateKey['d']),$privateKey['n']);
+			$descryptoText .= chr($eachPieceValue);
+		}
 
+		return $descryptoText;
+	}
 
-
-
-
-	public function criptografa_descriptografa_simetrica() {
+	public function simetric_crypto() {
 		$message = $this->keyValues->getMessage();
 		echo "Texto original: " . $message . "\n";
 		echo "Chave criptografada: " . base64_encode($message) . "\n";
 
-		$message_criptografada = base64_encode($message);
-		echo "Chave descriptografada: " . base64_decode($message_criptografada) . "\n";
+		$cryptoMessage = base64_encode($message);
+		echo "Chave descriptografada: " . base64_decode($cryptoMessage) . "\n";
 	}
 
 }
 
-$exec = new CryptoControl(17, 41, "TURING");
-$resposta = $exec->cryptoWithPublicKey();
-print_r ($resposta);
+$exec = new CryptoControl(17, 23, "TURING");
+//$resposta = $exec->cryptoWithPublicKey();
+$resposta = $exec->descryptoWithPrivateKey() . "\n";
+print_r($resposta);

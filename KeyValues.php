@@ -1,7 +1,5 @@
 <?php
 
-//require_once "CryptoControl.php";
-
 class KeyValues {
 	
 	public $numeroPrimo_1;
