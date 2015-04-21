@@ -121,10 +121,11 @@ class CryptoControl {
 
 }
 
-$exec = new CryptoControl(19, 23, "Desafio LabSEC");
+$exec = new CryptoControl(19, 23, "Segunda-feira, 20 de abril de 2015. #Desafio LabSEC");
 //$resposta = $exec->cryptoWithPublicKey();
 echo "Simétrica" . "\n";
 $respostaSimmetryc = $exec->simmetryc_crypto();
 echo "\n";
+
 echo "Assimétrica" . "\n";
 $respostaAsimmetryc = $exec->asimmetryc_crypto();
