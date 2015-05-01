@@ -1,5 +1,9 @@
 <?php
 
+/**Classe com funções comumente utilizadas pela classe principal (CryptoControl)
+Funções para verificar se um número é primo, para multiplicar números primos, função totient de euler e máximo divisor comum
+*/
+
 class MathHelper {
 
 	public function IsPrime($number) {
