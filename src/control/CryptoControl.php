@@ -4,7 +4,6 @@ require_once "MathHelper.php";
 require_once "../model/KeyValues.php";
 
 /*Desafio LabSEC
-  Aplicação para criptografia simétrica
   author: Rodolfo Lottin Pereira
   Data: 18/04/2015
 */
@@ -113,6 +112,6 @@ class CryptoControl {
 
 }
 
-$exec = new CryptoControl(59, 61, "A CJ é o terror delas!");
-echo "Assimétrica" . "\n";
+$exec = new CryptoControl(83, 29, "Testando aplicação RSA para Seminário de Sistemas Operacionais, 04/12/2015");
+echo "Criptografia assimétrica" . "\n";
 $respostaAsimmetryc = $exec->asimmetryc_crypto();
